@@ -3,6 +3,7 @@ import { z } from "zod";
 import { creditApprovedPayment } from "@/lib/contributions.server";
 import { getServerEnv } from "@/lib/env.server";
 import {
+  createCardPayment,
   createPixPayment,
   getMercadoPagoPayment,
 } from "@/lib/mercadopago.server";
@@ -39,57 +40,115 @@ export const getProducts = createServerFn({ method: "GET" }).handler(
   },
 );
 
-const createPixInput = z.object({
+const contributionBaseInput = z.object({
   productId: z.string().min(1),
   amount: z.number().positive().max(100_000),
   payerEmail: z.string().email(),
 });
 
+const createPixInput = contributionBaseInput;
+
+const createCardInput = contributionBaseInput.extend({
+  token: z.string().min(1),
+  paymentMethodId: z.string().min(1),
+  payerCpf: z
+    .string()
+    .transform((v) => v.replace(/\D/g, ""))
+    .refine((v) => v.length === 11, "CPF inválido"),
+  issuerId: z.string().optional().nullable(),
+  installments: z.number().int().min(1).max(24).optional(),
+});
+
+async function loadProductForContribution(
+  productId: string,
+  amount: number,
+): Promise<ProductRow> {
+  const supabase = getSupabaseAdmin();
+  const { data: productData, error: productError } = await supabase
+    .from("products")
+    .select("*")
+    .eq("id", productId)
+    .single();
+
+  const product = productData as ProductRow | null;
+
+  if (productError || !product) {
+    throw new Error("Presente não encontrado");
+  }
+
+  const remaining = Math.max(Number(product.goal) - Number(product.raised), 0);
+  if (remaining <= 0) {
+    throw new Error("Meta já atingida para este presente");
+  }
+  if (amount > remaining) {
+    throw new Error(
+      `Valor acima do restante da meta (${remaining.toLocaleString("pt-BR", {
+        style: "currency",
+        currency: "BRL",
+        maximumFractionDigits: 0,
+      })})`,
+    );
+  }
+
+  return product;
+}
+
+async function insertPendingContribution(input: {
+  productId: string;
+  amount: number;
+  payerEmail: string;
+}): Promise<string> {
+  const supabase = getSupabaseAdmin();
+  const contributionId = crypto.randomUUID();
+
+  const { error: insertError } = await supabase.from("contributions").insert({
+    id: contributionId,
+    product_id: input.productId,
+    amount: input.amount,
+    status: "pending",
+    payer_email: input.payerEmail.toLowerCase(),
+  });
+
+  if (insertError) {
+    throw new Error(insertError.message);
+  }
+
+  return contributionId;
+}
+
+async function cancelContribution(contributionId: string) {
+  const supabase = getSupabaseAdmin();
+  await supabase
+    .from("contributions")
+    .update({ status: "cancelled" })
+    .eq("id", contributionId);
+}
+
+async function linkPaymentId(contributionId: string, paymentId: string) {
+  const supabase = getSupabaseAdmin();
+  const { error: linkError } = await supabase
+    .from("contributions")
+    .update({ mp_payment_id: paymentId })
+    .eq("id", contributionId);
+
+  if (linkError) {
+    throw new Error(linkError.message);
+  }
+}
+
 export const createPixContribution = createServerFn({ method: "POST" })
   .validator(createPixInput)
   .handler(async ({ data }) => {
-    const supabase = getSupabaseAdmin();
     const env = getServerEnv();
-
-    const { data: productData, error: productError } = await supabase
-      .from("products")
-      .select("*")
-      .eq("id", data.productId)
-      .single();
-
-    const product = productData as ProductRow | null;
-
-    if (productError || !product) {
-      throw new Error("Presente não encontrado");
-    }
-
-    const remaining = Math.max(Number(product.goal) - Number(product.raised), 0);
-    if (remaining <= 0) {
-      throw new Error("Meta já atingida para este presente");
-    }
-    if (data.amount > remaining) {
-      throw new Error(
-        `Valor acima do restante da meta (${remaining.toLocaleString("pt-BR", {
-          style: "currency",
-          currency: "BRL",
-          maximumFractionDigits: 0,
-        })})`,
-      );
-    }
-
-    const contributionId = crypto.randomUUID();
-
-    const { error: insertError } = await supabase.from("contributions").insert({
-      id: contributionId,
-      product_id: product.id,
+    const product = await loadProductForContribution(
+      data.productId,
+      data.amount,
+    );
+    const contributionId = await insertPendingContribution({
+      productId: product.id,
       amount: data.amount,
-      status: "pending",
-      payer_email: data.payerEmail.toLowerCase(),
+      payerEmail: data.payerEmail,
     });
-
-    if (insertError) {
-      throw new Error(insertError.message);
-    }
 
     let payment;
     try {
@@ -102,10 +161,7 @@ export const createPixContribution = createServerFn({ method: "POST" })
         idempotencyKey: contributionId,
       });
     } catch (error) {
-      await supabase
-        .from("contributions")
-        .update({ status: "cancelled" })
-        .eq("id", contributionId);
+      await cancelContribution(contributionId);
       throw error;
     }
 
@@ -114,21 +170,11 @@ export const createPixContribution = createServerFn({ method: "POST" })
       payment.point_of_interaction?.transaction_data?.qr_code_base64;
 
     if (!qrCode || !qrCodeBase64) {
-      await supabase
-        .from("contributions")
-        .update({ status: "cancelled" })
-        .eq("id", contributionId);
+      await cancelContribution(contributionId);
       throw new Error("Mercado Pago não retornou o QR Code Pix");
     }
 
-    const { error: linkError } = await supabase
-      .from("contributions")
-      .update({ mp_payment_id: String(payment.id) })
-      .eq("id", contributionId);
-
-    if (linkError) {
-      throw new Error(linkError.message);
-    }
+    await linkPaymentId(contributionId, String(payment.id));
 
     return {
       contributionId,
@@ -138,6 +184,67 @@ export const createPixContribution = createServerFn({ method: "POST" })
       qrCodeBase64,
       expiresAt: payment.date_of_expiration ?? null,
       status: payment.status as "pending" | "approved",
+    };
+  });
+
+export const createCardContribution = createServerFn({ method: "POST" })
+  .validator(createCardInput)
+  .handler(async ({ data }) => {
+    const env = getServerEnv();
+    const product = await loadProductForContribution(
+      data.productId,
+      data.amount,
+    );
+    const contributionId = await insertPendingContribution({
+      productId: product.id,
+      amount: data.amount,
+      payerEmail: data.payerEmail,
+    });
+
+    let payment;
+    try {
+      payment = await createCardPayment({
+        amount: data.amount,
+        description: `${product.name} · Chá de Casa Nova`,
+        payerEmail: data.payerEmail.toLowerCase(),
+        payerCpf: data.payerCpf,
+        token: data.token,
+        paymentMethodId: data.paymentMethodId,
+        issuerId: data.issuerId,
+        installments: data.installments ?? 1,
+        externalReference: contributionId,
+        notificationUrl: `${env.appUrl}/api/webhooks/mercadopago`,
+        idempotencyKey: contributionId,
+      });
+    } catch (error) {
+      await cancelContribution(contributionId);
+      throw error;
+    }
+
+    await linkPaymentId(contributionId, String(payment.id));
+
+    if (
+      payment.status === "rejected" ||
+      payment.status === "cancelled" ||
+      payment.status === "expired"
+    ) {
+      await cancelContribution(contributionId);
+      throw new Error(
+        payment.status_detail
+          ? `Pagamento recusado (${payment.status_detail})`
+          : "Pagamento com cartão recusado",
+      );
+    }
+
+    if (payment.status === "approved") {
+      await creditApprovedPayment(String(payment.id));
+    }
+
+    return {
+      contributionId,
+      paymentId: String(payment.id),
+      amount: data.amount,
+      status: payment.status as "pending" | "approved" | "in_process",
     };
   });
 

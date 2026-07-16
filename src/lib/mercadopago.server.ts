@@ -1,7 +1,7 @@
 import { MercadoPagoConfig, Payment } from "mercadopago";
 import { getServerEnv } from "./env.server";
 
-export type MercadoPagoPixPayment = {
+export type MercadoPagoPayment = {
   id: number;
   status: string;
   status_detail?: string;
@@ -17,6 +17,9 @@ export type MercadoPagoPixPayment = {
   };
 };
 
+/** @deprecated alias — prefer MercadoPagoPayment */
+export type MercadoPagoPixPayment = MercadoPagoPayment;
+
 function getMpClient() {
   const { mpAccessToken } = getServerEnv();
   return new MercadoPagoConfig({ accessToken: mpAccessToken });
@@ -26,15 +29,15 @@ function getPaymentClient() {
   return new Payment(getMpClient());
 }
 
-function toPixPayment(payment: {
+function toPayment(payment: {
   id?: number;
   status?: string;
   status_detail?: string;
   transaction_amount?: number;
   external_reference?: string;
   date_of_expiration?: string;
-  point_of_interaction?: MercadoPagoPixPayment["point_of_interaction"];
-}): MercadoPagoPixPayment {
+  point_of_interaction?: MercadoPagoPayment["point_of_interaction"];
+}): MercadoPagoPayment {
   if (payment.id == null) {
     throw new Error("Mercado Pago não retornou o id do pagamento");
   }
@@ -53,11 +56,19 @@ function formatMpError(error: unknown): Error {
   if (error && typeof error === "object") {
     const e = error as {
       message?: string;
-      cause?: Array<{ description?: string; code?: string | number }>;
+      cause?: Array<{
+        description?: string;
+        message?: string;
+        code?: string | number;
+      }>;
       error?: string;
     };
     const detail =
-      e.cause?.[0]?.description || e.message || e.error || "Mercado Pago error";
+      e.cause?.[0]?.description ||
+      e.cause?.[0]?.message ||
+      e.message ||
+      e.error ||
+      "Mercado Pago error";
     return new Error(detail);
   }
   return error instanceof Error ? error : new Error("Mercado Pago error");
@@ -106,7 +117,61 @@ export async function createPixPayment(input: {
         idempotencyKey: input.idempotencyKey,
       },
     });
-    return toPixPayment(result);
+    return toPayment(result);
+  } catch (error) {
+    throw formatMpError(error);
+  }
+}
+
+export async function createCardPayment(input: {
+  amount: number;
+  description: string;
+  payerEmail: string;
+  payerCpf: string;
+  token: string;
+  paymentMethodId: string;
+  issuerId?: string | number | null;
+  installments?: number;
+  externalReference: string;
+  notificationUrl?: string | null;
+  idempotencyKey: string;
+}) {
+  const payment = getPaymentClient();
+  const cpf = input.payerCpf.replace(/\D/g, "");
+
+  const body: Parameters<Payment["create"]>[0]["body"] = {
+    transaction_amount: Number(input.amount.toFixed(2)),
+    description: input.description,
+    token: input.token,
+    installments: input.installments ?? 1,
+    payment_method_id: input.paymentMethodId,
+    payer: {
+      email: input.payerEmail,
+      identification: {
+        type: "CPF",
+        number: cpf,
+      },
+    },
+    external_reference: input.externalReference,
+  };
+
+  const issuerId = Number(input.issuerId);
+  if (Number.isFinite(issuerId) && issuerId > 0) {
+    body.issuer_id = issuerId;
+  }
+
+  if (input.notificationUrl && isPublicNotificationUrl(input.notificationUrl)) {
+    body.notification_url = input.notificationUrl;
+  }
+
+  try {
+    const result = await payment.create({
+      body,
+      requestOptions: {
+        idempotencyKey: input.idempotencyKey,
+      },
+    });
+    return toPayment(result);
   } catch (error) {
     throw formatMpError(error);
   }
@@ -116,7 +181,7 @@ export async function getMercadoPagoPayment(paymentId: string | number) {
   const payment = getPaymentClient();
   try {
     const result = await payment.get({ id: String(paymentId) });
-    return toPixPayment(result);
+    return toPayment(result);
   } catch (error) {
     throw formatMpError(error);
   }

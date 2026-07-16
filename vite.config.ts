@@ -4,9 +4,14 @@
 //     nitro (build-only), VITE_* env injection, @ path alias,
 //     React/TanStack dedupe, error logger plugins, and sandbox detection (port/host/strictPort).
 // You can pass additional config via defineConfig({ vite: { ... }, etc... }) if needed.
+import basicSsl from "@vitejs/plugin-basic-ssl";
 import { defineConfig } from "@lovable.dev/vite-tanstack-config";
 
 export default defineConfig({
+  // Mercado Pago blocks card tokenization on plain HTTP (even localhost).
+  vite: {
+    plugins: [basicSsl()],
+  },
   tanstackStart: {
     // Redirect TanStack Start's bundled server entry to src/server.ts (our SSR error wrapper).
     // nitro/vite builds from this
