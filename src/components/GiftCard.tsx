@@ -700,7 +700,7 @@ export function GiftCard({
                           />
                         </div>
                         <p className="text-xs text-muted-foreground">
-                          Os dados do cartão não passam pelo nosso servidor.
+                          O pagamento será processado pelo Mercado Pago.
                         </p>
                       </div>
                     )}
