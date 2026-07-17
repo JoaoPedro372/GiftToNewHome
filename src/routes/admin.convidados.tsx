@@ -187,9 +187,6 @@ function AdminGuestsPage() {
             <h1 className="mt-1 font-display text-2xl font-semibold">
               Convidados
             </h1>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Entre com a senha de `ADMIN_PASSWORD` do .env
-            </p>
           </div>
           <div className="space-y-2">
             <Label htmlFor="admin-pass">Senha</Label>
@@ -322,9 +319,7 @@ function AdminGuestsPage() {
                 Links dos convites
               </h2>
               <p className="text-sm text-muted-foreground">
-                Copie o link ou abra o WhatsApp com a mensagem pronta. Os links
-                usam o <code className="text-xs">APP_URL</code> do servidor
-                {appUrl ? ` (${appUrl})` : ""}.
+                Copie o link ou abra o WhatsApp com a mensagem pronta.
               </p>
             </div>
             <Button

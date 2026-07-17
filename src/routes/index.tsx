@@ -55,9 +55,7 @@ function HomePage() {
             Central do chá
           </h1>
           <p className="mt-5 max-w-xl text-base text-muted-foreground sm:text-lg">
-            Os convidados entram pelo link personalizado que vocês enviarem.
-            Esta página é o atalho de vocês para a lista e para gerenciar os
-            convites.
+            Gerencie a lista de presentes e os convites de forma fácil e segura.
           </p>
 
           <div className="mt-10 flex flex-col gap-3 sm:flex-row sm:items-center">
