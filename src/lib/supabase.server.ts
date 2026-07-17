@@ -22,6 +22,16 @@ export type ContributionRow = {
   paid_at: string | null;
 };
 
+export type GuestRow = {
+  id: string;
+  invite_code: string;
+  display_name: string;
+  email: string | null;
+  status: "pending" | "confirmed";
+  confirmed_at: string | null;
+  created_at: string;
+};
+
 let client: SupabaseClient | null = null;
 
 export function getSupabaseAdmin() {

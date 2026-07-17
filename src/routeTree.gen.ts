@@ -9,12 +9,30 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as PresentesRouteImport } from './routes/presentes'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as CCodeRouteImport } from './routes/c.$code'
+import { Route as AdminConvidadosRouteImport } from './routes/admin.convidados'
 import { Route as ApiWebhooksMercadopagoRouteImport } from './routes/api/webhooks/mercadopago'
 
+const PresentesRoute = PresentesRouteImport.update({
+  id: '/presentes',
+  path: '/presentes',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CCodeRoute = CCodeRouteImport.update({
+  id: '/c/$code',
+  path: '/c/$code',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminConvidadosRoute = AdminConvidadosRouteImport.update({
+  id: '/admin/convidados',
+  path: '/admin/convidados',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiWebhooksMercadopagoRoute = ApiWebhooksMercadopagoRouteImport.update({
@@ -25,37 +43,86 @@ const ApiWebhooksMercadopagoRoute = ApiWebhooksMercadopagoRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/presentes': typeof PresentesRoute
+  '/admin/convidados': typeof AdminConvidadosRoute
+  '/c/$code': typeof CCodeRoute
   '/api/webhooks/mercadopago': typeof ApiWebhooksMercadopagoRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/presentes': typeof PresentesRoute
+  '/admin/convidados': typeof AdminConvidadosRoute
+  '/c/$code': typeof CCodeRoute
   '/api/webhooks/mercadopago': typeof ApiWebhooksMercadopagoRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/presentes': typeof PresentesRoute
+  '/admin/convidados': typeof AdminConvidadosRoute
+  '/c/$code': typeof CCodeRoute
   '/api/webhooks/mercadopago': typeof ApiWebhooksMercadopagoRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/api/webhooks/mercadopago'
+  fullPaths:
+    | '/'
+    | '/presentes'
+    | '/admin/convidados'
+    | '/c/$code'
+    | '/api/webhooks/mercadopago'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/api/webhooks/mercadopago'
-  id: '__root__' | '/' | '/api/webhooks/mercadopago'
+  to:
+    | '/'
+    | '/presentes'
+    | '/admin/convidados'
+    | '/c/$code'
+    | '/api/webhooks/mercadopago'
+  id:
+    | '__root__'
+    | '/'
+    | '/presentes'
+    | '/admin/convidados'
+    | '/c/$code'
+    | '/api/webhooks/mercadopago'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  PresentesRoute: typeof PresentesRoute
+  AdminConvidadosRoute: typeof AdminConvidadosRoute
+  CCodeRoute: typeof CCodeRoute
   ApiWebhooksMercadopagoRoute: typeof ApiWebhooksMercadopagoRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/presentes': {
+      id: '/presentes'
+      path: '/presentes'
+      fullPath: '/presentes'
+      preLoaderRoute: typeof PresentesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/c/$code': {
+      id: '/c/$code'
+      path: '/c/$code'
+      fullPath: '/c/$code'
+      preLoaderRoute: typeof CCodeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/convidados': {
+      id: '/admin/convidados'
+      path: '/admin/convidados'
+      fullPath: '/admin/convidados'
+      preLoaderRoute: typeof AdminConvidadosRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/webhooks/mercadopago': {
@@ -70,6 +137,9 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  PresentesRoute: PresentesRoute,
+  AdminConvidadosRoute: AdminConvidadosRoute,
+  CCodeRoute: CCodeRoute,
   ApiWebhooksMercadopagoRoute: ApiWebhooksMercadopagoRoute,
 }
 export const routeTree = rootRouteImport

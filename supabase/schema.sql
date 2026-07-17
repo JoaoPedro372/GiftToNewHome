@@ -100,3 +100,29 @@ values
     6
   )
 on conflict (id) do nothing;
+
+-- Guests / unique invite links
+create table if not exists public.guests (
+  id uuid primary key default gen_random_uuid(),
+  invite_code text not null unique,
+  display_name text not null,
+  email text,
+  status text not null default 'pending'
+    check (status in ('pending', 'confirmed')),
+  confirmed_at timestamptz,
+  created_at timestamptz not null default now()
+);
+
+create index if not exists guests_status_idx on public.guests (status);
+
+alter table public.guests enable row level security;
+
+-- Writes/reads go through service role on the server only.
+drop policy if exists "No public access guests" on public.guests;
+
+-- Example guests (share links like /c/<invite_code>)
+insert into public.guests (invite_code, display_name)
+values
+  ('demo-maria', 'Maria'),
+  ('demo-casal', 'Pedro & Juliana')
+on conflict (invite_code) do nothing;
