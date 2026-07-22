@@ -98,10 +98,10 @@ function InvitePage() {
 
         <div className="relative mx-auto flex min-h-[100svh] max-w-3xl flex-col justify-center px-6 py-16 sm:py-20">
           <p className="animate-in fade-in slide-in-from-bottom-2 font-display text-3xl font-semibold tracking-tight duration-700 sm:text-5xl">
-            {event.coupleNames}
+            {event.title}
           </p>
           <p className="animate-in fade-in slide-in-from-bottom-2 mt-3 text-sm font-medium uppercase tracking-[0.18em] text-muted-foreground duration-700 delay-100">
-            {event.title}
+            {event.coupleNames}
           </p>
 
           <h1 className="animate-in fade-in slide-in-from-bottom-3 mt-8 font-display text-4xl font-semibold leading-[1.1] duration-700 delay-150 sm:text-5xl">

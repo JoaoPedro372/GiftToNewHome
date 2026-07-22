@@ -1,5 +1,4 @@
 import { createFileRoute, useRouter } from "@tanstack/react-router";
-import { useMemo } from "react";
 import { Toaster } from "@/components/ui/sonner";
 import { GiftCard } from "@/components/GiftCard";
 import { Button } from "@/components/ui/button";
@@ -37,23 +36,6 @@ function PresentesPage() {
   const products = Route.useLoaderData();
   const router = useRouter();
 
-  const totals = useMemo(() => {
-    const goal = products.reduce((s, p) => s + p.goal, 0);
-    const raised = products.reduce((s, p) => s + p.raised, 0);
-    return {
-      goal,
-      raised,
-      percent: goal > 0 ? Math.round((raised / goal) * 100) : 0,
-    };
-  }, [products]);
-
-  const brl = (n: number) =>
-    n.toLocaleString("pt-BR", {
-      style: "currency",
-      currency: "BRL",
-      maximumFractionDigits: 0,
-    });
-
   return (
     <div className="min-h-screen bg-background">
       <Toaster position="top-center" richColors />
@@ -69,7 +51,10 @@ function PresentesPage() {
               size="sm"
               type="button"
               onClick={() => {
-                if (typeof window !== "undefined" && window.history.length > 1) {
+                if (
+                  typeof window !== "undefined" &&
+                  window.history.length > 1
+                ) {
                   window.history.back();
                   return;
                 }
@@ -82,34 +67,17 @@ function PresentesPage() {
           </div>
 
           <h1 className="mt-8 text-4xl font-semibold leading-tight sm:text-6xl">
-            Nossa listinha de{" "}
-            <span className="text-primary">presentes</span>
+            Nossa listinha de <span className="text-primary">presentes</span>
           </h1>
           <p className="mt-5 max-w-2xl text-base text-muted-foreground sm:text-lg">
             Estamos montando cada cantinho aos poucos. Escolha um presente e
             contribua com o valor que estiver no seu coração.
           </p>
-
-          <div className="mt-8 max-w-xl rounded-2xl bg-card/80 p-5 shadow-card backdrop-blur">
-            <div className="flex items-baseline justify-between gap-2">
-              <span className="text-sm text-muted-foreground">
-                Arrecadado no total
-              </span>
-              <span className="text-sm font-semibold">{totals.percent}%</span>
-            </div>
-            <div className="mt-1 text-2xl font-semibold">
-              {brl(totals.raised)}{" "}
-              <span className="text-base font-normal text-muted-foreground">
-                de {brl(totals.goal)}
-              </span>
-            </div>
-            <div className="mt-3 h-2.5 w-full overflow-hidden rounded-full bg-muted">
-              <div
-                className="bg-progress h-full rounded-full transition-[width] duration-700"
-                style={{ width: `${totals.percent}%` }}
-              />
-            </div>
-          </div>
+          <p className="mt-5 max-w-2xl text-base text-muted-foreground sm:text-lg">
+            Ao clicar em "Ajudar" você poderá escolher o valor que deseja
+            contribuir para o presente. Podendo ser o valor total do presente ou
+            um valor parcial.
+          </p>
         </div>
       </header>
 

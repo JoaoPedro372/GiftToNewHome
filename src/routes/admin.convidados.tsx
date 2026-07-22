@@ -10,6 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import {
   Check,
   Copy,
+  Gift,
   Loader2,
   LogOut,
   MessageCircle,
@@ -17,6 +18,7 @@ import {
   RefreshCw,
   Users,
 } from "lucide-react";
+import { AdminProductsModal } from "@/components/AdminProductsModal";
 import { getErrorMessage } from "@/lib/errors";
 import { event } from "@/lib/event";
 import {
@@ -27,6 +29,7 @@ import {
   type GuestAdmin,
 } from "@/lib/guests-admin";
 import { inviteUrl, inviteWhatsAppUrl } from "@/lib/invite";
+import { listProductsAdmin, type ProductAdmin } from "@/lib/products-admin";
 
 const STORAGE_KEY = "cha-admin-password";
 
@@ -40,6 +43,7 @@ export const Route = createFileRoute("/admin/convidados")({
 function AdminGuestsPage() {
   const verify = useServerFn(verifyAdminPassword);
   const listGuests = useServerFn(listGuestsAdmin);
+  const listProducts = useServerFn(listProductsAdmin);
   const createOne = useServerFn(createGuestAdmin);
   const createBulk = useServerFn(createGuestsBulkAdmin);
 
@@ -48,28 +52,54 @@ function AdminGuestsPage() {
   const [appUrl, setAppUrl] = useState("");
   const [loginBusy, setLoginBusy] = useState(false);
   const [guests, setGuests] = useState<GuestAdmin[]>([]);
+  const [products, setProducts] = useState<ProductAdmin[]>([]);
   const [loadingList, setLoadingList] = useState(false);
   const [singleName, setSingleName] = useState("");
   const [bulkNames, setBulkNames] = useState("");
   const [creating, setCreating] = useState(false);
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
+  const [productsOpen, setProductsOpen] = useState(false);
 
   const origin =
-    appUrl ||
-    (typeof window !== "undefined" ? window.location.origin : "");
+    appUrl || (typeof window !== "undefined" ? window.location.origin : "");
 
   const stats = useMemo(() => {
     const confirmed = guests.filter((g) => g.status === "confirmed").length;
-    return { total: guests.length, confirmed, pending: guests.length - confirmed };
+    return {
+      total: guests.length,
+      confirmed,
+      pending: guests.length - confirmed,
+    };
   }, [guests]);
+
+  const giftTotals = useMemo(() => {
+    const goal = products.reduce((s, p) => s + p.goal, 0);
+    const raised = products.reduce((s, p) => s + p.raised, 0);
+    return {
+      goal,
+      raised,
+      percent: goal > 0 ? Math.round((raised / goal) * 100) : 0,
+    };
+  }, [products]);
+
+  const brl = (n: number) =>
+    n.toLocaleString("pt-BR", {
+      style: "currency",
+      currency: "BRL",
+      maximumFractionDigits: 0,
+    });
 
   const refresh = async (adminPassword: string) => {
     setLoadingList(true);
     try {
-      const rows = await listGuests({ data: { adminPassword } });
-      setGuests(rows);
+      const [guestRows, productRows] = await Promise.all([
+        listGuests({ data: { adminPassword } }),
+        listProducts({ data: { adminPassword } }),
+      ]);
+      setGuests(guestRows);
+      setProducts(productRows);
     } catch (error) {
-      toast.error(getErrorMessage(error, "Não foi possível carregar convidados"));
+      toast.error(getErrorMessage(error, "Não foi possível carregar o painel"));
       throw error;
     } finally {
       setLoadingList(false);
@@ -113,6 +143,7 @@ function AdminGuestsPage() {
     setAuthedPassword(null);
     setPassword("");
     setGuests([]);
+    setProducts([]);
   };
 
   const copyText = async (text: string, code?: string) => {
@@ -234,6 +265,14 @@ function AdminGuestsPage() {
             <Button
               variant="outline"
               size="sm"
+              onClick={() => setProductsOpen(true)}
+            >
+              <Gift className="h-3.5 w-3.5" />
+              Editar presentes
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
               disabled={loadingList}
               onClick={() => void refresh(authedPassword)}
             >
@@ -248,9 +287,41 @@ function AdminGuestsPage() {
         </div>
       </header>
 
+      <AdminProductsModal
+        open={productsOpen}
+        onOpenChange={(open) => {
+          setProductsOpen(open);
+          if (!open && authedPassword) {
+            void refresh(authedPassword);
+          }
+        }}
+        adminPassword={authedPassword}
+      />
+
       <main className="mx-auto max-w-5xl space-y-10 px-6 py-10">
+        <div className="rounded-2xl border border-border bg-card p-5 shadow-card">
+          <div className="flex items-baseline justify-between gap-2">
+            <span className="text-sm text-muted-foreground">
+              Arrecadado no total
+            </span>
+            <span className="text-sm font-semibold">{giftTotals.percent}%</span>
+          </div>
+          <div className="mt-1 text-2xl font-semibold">
+            {brl(giftTotals.raised)}{" "}
+            <span className="text-base font-normal text-muted-foreground">
+              de {brl(giftTotals.goal)}
+            </span>
+          </div>
+          <div className="mt-3 h-2.5 w-full overflow-hidden rounded-full bg-muted">
+            <div
+              className="bg-progress h-full rounded-full transition-[width] duration-700"
+              style={{ width: `${giftTotals.percent}%` }}
+            />
+          </div>
+        </div>
+
         <div className="grid gap-3 sm:grid-cols-3">
-          <Stat label="Total" value={stats.total} />
+          <Stat label="Convidados" value={stats.total} />
           <Stat label="Confirmados" value={stats.confirmed} />
           <Stat label="Pendentes" value={stats.pending} />
         </div>
@@ -361,7 +432,9 @@ function AdminGuestsPage() {
                         {guest.status === "confirmed" ? (
                           <span className="text-primary">Confirmado</span>
                         ) : (
-                          <span className="text-muted-foreground">Pendente</span>
+                          <span className="text-muted-foreground">
+                            Pendente
+                          </span>
                         )}
                       </p>
                     </div>
