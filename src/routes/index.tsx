@@ -9,7 +9,7 @@ export const Route = createFileRoute("/")({
       { title: `${event.title} · ${event.coupleNames}` },
       {
         name: "description",
-        content: `${event.tagline}`,
+        content: `${event.tagline} ${event.subTagline}`,
       },
       {
         property: "og:title",
