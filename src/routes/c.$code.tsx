@@ -136,19 +136,19 @@ function InvitePage() {
               </a>
             )}
           </div>
-          <div className="mt-12 rounded-2xl bg-hero px-5 py-8 text-center sm:px-8 border-2 border-primary/30">
+          <div className="mt-12 w-full max-w-full overflow-hidden rounded-2xl border-2 border-primary/30 bg-hero px-5 py-8 text-center sm:px-8">
             <p className="font-display text-2xl font-semibold">
               Quer nos ajudar a montar nossa casa nova?
             </p>
             <Button
               size="lg"
-              className="mt-6 h-12 px-8 text-base text-white font-bold"
+              className="mt-6 h-auto min-h-12 w-full max-w-full whitespace-normal px-4 py-3 text-sm font-bold text-white sm:px-8 sm:text-base"
               asChild
             >
               <Link to="/presentes">
-                <Gift className="h-4 w-4" />
-                ABRIR LISTA DE PRESENTES
-                <ArrowRight className="h-4 w-4" />
+                <Gift className="h-4 w-4 shrink-0" />
+                <span className="text-balance">Abrir lista de presentes</span>
+                <ArrowRight className="h-4 w-4 shrink-0" />
               </Link>
             </Button>
           </div>
@@ -234,19 +234,19 @@ function InvitePage() {
           </div>
         )}
 
-        <div className="mt-12 rounded-2xl bg-hero px-5 py-8 text-center sm:px-8 border-2 border-primary/30">
+        <div className="mt-12 w-full max-w-full overflow-hidden rounded-2xl border-2 border-primary/30 bg-hero px-5 py-8 text-center sm:px-8">
           <p className="font-display text-2xl font-semibold">
             Quer nos ajudar a montar nossa casa nova?
           </p>
           <Button
             size="lg"
-            className="mt-6 h-12 px-8 text-base text-white font-bold"
+            className="mt-6 h-auto min-h-12 w-full max-w-full whitespace-normal px-4 py-3 text-sm font-bold text-white sm:px-8 sm:text-base"
             asChild
           >
             <Link to="/presentes">
-              <Gift className="h-4 w-4" />
-              ABRIR LISTA DE PRESENTES
-              <ArrowRight className="h-4 w-4" />
+              <Gift className="h-4 w-4 shrink-0" />
+              <span className="text-balance">Abrir lista de presentes</span>
+              <ArrowRight className="h-4 w-4 shrink-0" />
             </Link>
           </Button>
         </div>
