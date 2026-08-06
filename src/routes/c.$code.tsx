@@ -6,6 +6,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { Button } from "@/components/ui/button";
 import {
   ArrowRight,
+  ArrowDown,
   CalendarDays,
   Check,
   Gift,
@@ -118,13 +119,38 @@ function InvitePage() {
             {event.tagline} <br /> {event.subTagline}
           </p>
 
-          <div className="animate-in fade-in slide-in-from-bottom-4 mt-10 flex flex-col gap-3 duration-700 delay-300 sm:flex-row sm:items-center">
-            <a
-              href="#confirmar"
-              className="inline-flex h-12 items-center justify-center rounded-md px-4 text-sm font-medium text-foreground hover:opacity-80 bg-primary text-white font-semibold"
+          <div className="animate-in fade-in slide-in-from-bottom-4 mt-10 flex flex-col gap-3 duration-700 delay-300 sm:flex-row sm:items-center justify-center">
+            {confirmed ? (
+              <a
+                href="#confirmar"
+                className="inline-flex h-12 w-full font-bold items-center justify-center rounded-md px-4 text-sm  text-foreground hover:opacity-80 bg-primary text-white"
+              >
+                Conferir data e local
+              </a>
+            ) : (
+              <a
+                href="#confirmar"
+                className="inline-flex h-12 w-full font-bold items-center justify-center rounded-md px-4 text-sm  text-foreground hover:opacity-80 bg-primary text-white"
+              >
+                Confirmar presença
+              </a>
+            )}
+          </div>
+          <div className="mt-12 rounded-2xl bg-hero px-5 py-8 text-center sm:px-8 border-2 border-primary/30">
+            <p className="font-display text-2xl font-semibold">
+              Quer nos ajudar a montar nossa casa nova?
+            </p>
+            <Button
+              size="lg"
+              className="mt-6 h-12 px-8 text-base text-white font-bold"
+              asChild
             >
-              Confirmar presença
-            </a>
+              <Link to="/presentes">
+                <Gift className="h-4 w-4" />
+                ABRIR LISTA DE PRESENTES
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+            </Button>
           </div>
         </div>
       </section>
@@ -132,8 +158,8 @@ function InvitePage() {
       <section className="border-y border-border/80 bg-card/40">
         <div className="mx-auto grid max-w-3xl gap-8 px-6 py-12 sm:grid-cols-2 sm:py-14">
           <div>
-            <p className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-              <CalendarDays className="h-3.5 w-3.5" />
+            <p className="inline-flex items-center gap-2 text-md font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+              <CalendarDays className="h-5 w-5" />
               {event.whenLabel}
             </p>
             <p className="mt-2 font-display text-xl font-semibold sm:text-2xl">
@@ -141,26 +167,33 @@ function InvitePage() {
             </p>
           </div>
           <div>
-            <p className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-              <MapPin className="h-3.5 w-3.5" />
+            <p className="inline-flex items-center gap-2 text-md font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+              <MapPin className="h-5 w-5" />
               {event.whereLabel}
-            </p>
-            <p className="mt-2 font-display text-xl font-semibold sm:text-2xl">
-              {event.where}
             </p>
             <a
               href={event.addressMapsUrl}
               target="_blank"
               rel="noreferrer"
-              className="mt-1 inline-block text-sm text-muted-foreground underline-offset-4 hover:underline"
+              className="mt-3 flex items-start gap-3 rounded-2xl border-2 border-primary/30 bg-sage-soft/40 px-4 py-4 transition-colors hover:border-primary/55 hover:bg-sage-soft/70"
             >
-              {event.address}
+              <span className="min-w-0">
+                <span className="block font-display text-base font-semibold leading-snug text-foreground sm:text-lg">
+                  {event.address}
+                </span>
+                <span className="mt-1 block text-xs font-medium text-muted-foreground">
+                  Clique para abrir no Google Maps
+                </span>
+              </span>
             </a>
           </div>
         </div>
       </section>
 
-      <section id="confirmar" className="mx-auto max-w-3xl px-6 py-14 sm:py-16">
+      <section
+        id="confirmar"
+        className="mx-auto max-w-3xl px-6 py-14 sm:py-16 justify-center"
+      >
         <h2 className="font-display text-2xl font-semibold sm:text-3xl">
           Confirmar presença
         </h2>
@@ -170,20 +203,20 @@ function InvitePage() {
 
         {confirmed ? (
           <div className="mt-8 rounded-2xl border border-primary/30 bg-sage-soft/60 px-5 py-6">
-            <p className="inline-flex items-center gap-2 font-medium">
-              <Check className="h-4 w-4 text-primary" />
+            <p className="inline-flex items-center gap-2 text-lg font-medium w-full justify-center">
+              <Check className="h-6 w-6 text-primary" />
               Presença confirmada
             </p>
-            <p className="mt-2 text-sm text-muted-foreground">
+            <p className="mt-2 text-md text-muted-foreground text-center">
               Obrigado, {guest.displayName}! Estamos ansiosos para receber
               vocês!
             </p>
           </div>
         ) : (
-          <div className="mt-8">
+          <div className="mt-8 w-full">
             <Button
               size="lg"
-              className="h-12 w-full px-8 text-base sm:w-auto"
+              className="h-12 w-full px-8 text-base font-bold text-white"
               disabled={submitting}
               onClick={() => void submit()}
             >
@@ -201,14 +234,18 @@ function InvitePage() {
           </div>
         )}
 
-        <div className="mt-12 rounded-2xl bg-hero px-5 py-8 text-center sm:px-8">
+        <div className="mt-12 rounded-2xl bg-hero px-5 py-8 text-center sm:px-8 border-2 border-primary/30">
           <p className="font-display text-2xl font-semibold">
             Quer nos ajudar a montar nossa casa nova?
           </p>
-          <Button size="lg" className="mt-6 h-12 px-8 text-base" asChild>
+          <Button
+            size="lg"
+            className="mt-6 h-12 px-8 text-base text-white font-bold"
+            asChild
+          >
             <Link to="/presentes">
               <Gift className="h-4 w-4" />
-              Abrir lista de presentes
+              ABRIR LISTA DE PRESENTES
               <ArrowRight className="h-4 w-4" />
             </Link>
           </Button>
