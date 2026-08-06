@@ -12,9 +12,9 @@ export function inviteWhatsAppUrl(origin: string, input: {
   const text = [
     `Oi, ${input.displayName}!`,
     "",
-    `Vocês estão convidados para o ${event.title} de ${event.coupleNames}.`,
+    `Vocês estão convidados para o ${event.title} ${event.title2} de ${event.coupleNames}.`,
     "",
-    `Confirme presença e veja a lista de presentes aqui:`,
+    `Confirme presença e se quiser nos ajudar nessa nova etapa, veja a lista de presentes aqui:`,
     url,
   ].join("\n");
 
