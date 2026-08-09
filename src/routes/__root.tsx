@@ -10,7 +10,6 @@ import {
 import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
-import { event } from "../lib/event";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 
 function NotFoundComponent() {
@@ -82,32 +81,19 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       meta: [
         { charSet: "utf-8" },
         { name: "viewport", content: "width=device-width, initial-scale=1" },
-        {
-          title: `${event.title} ${event.title2} · ${event.coupleNames}`,
-        },
+        { title: "Chá de Casa Nova" },
         {
           name: "description",
-          content: event.tagline,
+          content:
+            "Lista de presentes do nosso chá de casa nova — escolha um item e contribua com o valor que quiser.",
         },
-        {
-          property: "og:title",
-          content: `${event.title} ${event.title2} · ${event.coupleNames}`,
-        },
+        { property: "og:title", content: "Chá de Casa Nova" },
         {
           property: "og:description",
-          content: event.tagline,
+          content: "Lista de presentes do nosso chá de casa nova.",
         },
         { property: "og:type", content: "website" },
-        // Foto da prévia no WhatsApp: public/og-share.jpeg
-        {
-          property: "og:image",
-          content: `${(process.env.APP_URL ?? "").replace(/\/$/, "")}/og-share.jpeg`,
-        },
         { name: "twitter:card", content: "summary_large_image" },
-        {
-          name: "twitter:image",
-          content: `${(process.env.APP_URL ?? "").replace(/\/$/, "")}/og-share.jpeg`,
-        },
       ],
       links: [
         { rel: "stylesheet", href: appCss },
