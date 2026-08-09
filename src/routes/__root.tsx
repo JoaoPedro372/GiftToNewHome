@@ -93,7 +93,15 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
           content: "Lista de presentes do nosso chá de casa nova.",
         },
         { property: "og:type", content: "website" },
+        {
+          property: "og:image",
+          content: `${(process.env.APP_URL ?? "").replace(/\/$/, "")}/og-share.jpeg`,
+        },
         { name: "twitter:card", content: "summary_large_image" },
+        {
+          name: "twitter:image",
+          content: `${(process.env.APP_URL ?? "").replace(/\/$/, "")}/og-share.jpeg`,
+        },
       ],
       links: [
         { rel: "stylesheet", href: appCss },
