@@ -25,19 +25,36 @@ export const Route = createFileRoute("/c/$code")({
       throw notFound();
     }
   },
-  head: ({ loaderData }) => ({
-    meta: [
-      {
-        title: loaderData
-          ? `${loaderData.displayName} · ${event.title}`
-          : event.title,
-      },
-      {
-        name: "description",
-        content: `Você está convidado para o ${event.title} de ${event.coupleNames}.`,
-      },
-    ],
-  }),
+  head: ({ loaderData }) => {
+    const pub = (process.env.PUBLIC_APP_URL || "").replace(/\/$/, "");
+    const app = (process.env.APP_URL || "").replace(/\/$/, "");
+    const origin =
+      pub ||
+      (app && !/localhost|127\.0\.0\.1/i.test(app)
+        ? app
+        : "https://cha-casa-nova-omega.vercel.app");
+    const shareImage = `${origin}/og-share.jpeg?v=3`;
+    const ogTitle = `${event.title} ${event.title2} · ${event.coupleNames}`;
+    const ogDescription = `Vocês estão convidados para o ${event.title} ${event.title2} de ${event.coupleNames}.`;
+    return {
+      meta: [
+        {
+          title: loaderData
+            ? `${loaderData.displayName} · ${event.title}`
+            : event.title,
+        },
+        {
+          name: "description",
+          content: ogDescription,
+        },
+        { property: "og:title", content: ogTitle },
+        { property: "og:description", content: ogDescription },
+        { property: "og:image", content: shareImage },
+        { name: "twitter:card", content: "summary_large_image" },
+        { name: "twitter:image", content: shareImage },
+      ],
+    };
+  },
   component: InvitePage,
   notFoundComponent: InviteNotFound,
 });

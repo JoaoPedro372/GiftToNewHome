@@ -28,7 +28,11 @@ import {
   verifyAdminPassword,
   type GuestAdmin,
 } from "@/lib/guests-admin";
-import { inviteUrl, inviteWhatsAppUrl } from "@/lib/invite";
+import {
+  inviteMessageText,
+  inviteUrl,
+  inviteWhatsAppUrl,
+} from "@/lib/invite";
 import { listProductsAdmin, type ProductAdmin } from "@/lib/products-admin";
 
 const STORAGE_KEY = "cha-admin-password";
@@ -200,10 +204,8 @@ function AdminGuestsPage() {
   };
 
   const copyAllLinks = async () => {
-    const lines = guests.map(
-      (g) => `${g.displayName}\t${inviteUrl(origin, g.inviteCode)}`,
-    );
-    await copyText(lines.join("\n"));
+    const blocks = guests.map((g) => inviteMessageText(origin, g));
+    await copyText(blocks.join("\n\n————\n\n"));
   };
 
   if (!authedPassword) {
@@ -400,7 +402,7 @@ function AdminGuestsPage() {
               onClick={() => void copyAllLinks()}
             >
               <Copy className="h-3.5 w-3.5" />
-              Copiar todos (nome + link)
+              Copiar todos (mensagem)
             </Button>
           </div>
 
@@ -417,6 +419,7 @@ function AdminGuestsPage() {
             <ul className="divide-y divide-border rounded-2xl border border-border bg-card">
               {guests.map((guest) => {
                 const url = inviteUrl(origin, guest.inviteCode);
+                const message = inviteMessageText(origin, guest);
                 const wa = inviteWhatsAppUrl(origin, guest);
                 return (
                   <li
@@ -442,14 +445,16 @@ function AdminGuestsPage() {
                       <Button
                         size="sm"
                         variant="outline"
-                        onClick={() => void copyText(url, guest.inviteCode)}
+                        onClick={() =>
+                          void copyText(message, guest.inviteCode)
+                        }
                       >
                         {copiedCode === guest.inviteCode ? (
                           <Check className="h-3.5 w-3.5" />
                         ) : (
                           <Copy className="h-3.5 w-3.5" />
                         )}
-                        Copiar link
+                        Copiar mensagem
                       </Button>
                       <Button size="sm" variant="secondary" asChild>
                         <a href={wa} target="_blank" rel="noreferrer">

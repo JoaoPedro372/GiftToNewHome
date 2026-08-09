@@ -1,24 +1,60 @@
 import { event } from "@/lib/event";
 
-export function inviteUrl(origin: string, inviteCode: string) {
-  return `${origin.replace(/\/$/, "")}/c/${inviteCode}`;
+/** Site público — WhatsApp não consegue ler localhost. */
+const PRODUCTION_URL = "https://cha-casa-nova-omega.vercel.app";
+
+/** Garante origem pública para links de convite / WhatsApp. */
+export function resolveInviteOrigin(origin: string) {
+  const base = (origin || "").replace(/\/$/, "");
+  if (!base || /localhost|127\.0\.0\.1/i.test(base)) {
+    return PRODUCTION_URL;
+  }
+  return base;
 }
 
-export function inviteWhatsAppUrl(origin: string, input: {
-  inviteCode: string;
-  displayName: string;
-}) {
+export function inviteUrl(origin: string, inviteCode: string) {
+  return `${resolveInviteOrigin(origin)}/c/${inviteCode}`;
+}
+
+/** Casal (tem "&") → plural; nome sozinho → singular. */
+export function isCoupleInvite(displayName: string) {
+  return displayName.includes("&");
+}
+
+/** Texto completo do convite (WhatsApp e "Copiar"). */
+export function inviteMessageText(
+  origin: string,
+  input: {
+    inviteCode: string;
+    displayName: string;
+  },
+) {
   const url = inviteUrl(origin, input.inviteCode);
-  const text = [
+  const couple = isCoupleInvite(input.displayName);
+  const greeting = couple
+    ? `Vocês estão convidados para o ${event.title} ${event.title2} de ${event.coupleNames}.`
+    : `Você está convidado para o ${event.title} ${event.title2} de ${event.coupleNames}.`;
+
+  return [
     `Oi, ${input.displayName}!`,
     "",
-    `Vocês estão convidados para o ${event.title} ${event.title2} de ${event.coupleNames}.`,
+    greeting,
     "",
     `Confirme presença e se quiser nos ajudar nessa nova etapa, veja a lista de presentes aqui:`,
     url,
   ].join("\n");
+}
 
-  return `https://wa.me/?text=${encodeURIComponent(text)}`;
+export function inviteWhatsAppUrl(
+  origin: string,
+  input: {
+    inviteCode: string;
+    displayName: string;
+  },
+) {
+  return `https://wa.me/?text=${encodeURIComponent(
+    inviteMessageText(origin, input),
+  )}`;
 }
 
 /** "Ana & Carlos" → "ana-carlos" */

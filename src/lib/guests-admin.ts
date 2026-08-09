@@ -60,7 +60,8 @@ export const verifyAdminPassword = createServerFn({ method: "POST" })
   .validator(adminAuth)
   .handler(async ({ data }) => {
     assertAdminPassword(data.adminPassword);
-    return { ok: true as const, appUrl: getServerEnv().appUrl };
+    // Usa PUBLIC_APP_URL (produção) para links de WhatsApp — não localhost.
+    return { ok: true as const, appUrl: getServerEnv().publicAppUrl };
   });
 
 export const listGuestsAdmin = createServerFn({ method: "POST" })

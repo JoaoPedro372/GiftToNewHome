@@ -6,11 +6,25 @@ function required(name: string): string {
   return value;
 }
 
+function stripSlash(url: string) {
+  return url.replace(/\/$/, "");
+}
+
+const PRODUCTION_URL = "https://cha-casa-nova-omega.vercel.app";
+
 export function getServerEnv() {
+  const appUrl = stripSlash(required("APP_URL"));
+  // Links de convite / WhatsApp / foto da prévia (nunca localhost).
+  const fromEnv = stripSlash(process.env.PUBLIC_APP_URL?.trim() || "");
+  const publicAppUrl =
+    fromEnv ||
+    (/localhost|127\.0\.0\.1/i.test(appUrl) ? PRODUCTION_URL : appUrl);
+
   return {
     mpAccessToken: required("MP_ACCESS_TOKEN"),
     mpWebhookSecret: process.env.MP_WEBHOOK_SECRET ?? "",
-    appUrl: required("APP_URL").replace(/\/$/, ""),
+    appUrl,
+    publicAppUrl,
     supabaseUrl: required("SUPABASE_URL"),
     supabaseServiceRoleKey: required("SUPABASE_SERVICE_ROLE_KEY"),
     /** Password for /admin/convidados — set a long random string. */
