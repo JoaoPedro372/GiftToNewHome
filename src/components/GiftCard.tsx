@@ -477,15 +477,15 @@ export function GiftCard({
             <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-md">
               {!pending ? (
                 <>
-                  <DialogHeader>
-                    <DialogTitle>Contribuir para {product.name}</DialogTitle>
-                    <DialogDescription>
-                      Faltam {brl(remaining)} para bater a meta. Escolha um valor
+              <DialogHeader>
+                <DialogTitle>Contribuir para {product.name}</DialogTitle>
+                <DialogDescription>
+                  Faltam {brl(remaining)} para bater a meta. Escolha um valor
                       e a forma de pagamento.
-                    </DialogDescription>
-                  </DialogHeader>
+                </DialogDescription>
+              </DialogHeader>
 
-                  <div className="space-y-4 pt-2">
+              <div className="space-y-4 pt-2">
                     <div className="grid grid-cols-2 gap-2">
                       <button
                         type="button"
@@ -512,43 +512,43 @@ export function GiftCard({
                       </button>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-                      {presets.map((amt) => (
-                        <button
-                          key={amt}
-                          type="button"
-                          onClick={() => {
-                            setSelected(amt);
-                            setCustom("");
-                          }}
-                          className={`rounded-xl border-2 px-3 py-3 text-sm font-semibold transition-colors ${
-                            selected === amt
-                              ? "border-primary bg-sage-soft"
-                              : "border-border bg-card hover:border-primary/40"
-                          }`}
-                        >
-                          {brl(amt)}
-                        </button>
-                      ))}
-                    </div>
+                <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+                  {presets.map((amt) => (
+                    <button
+                      key={amt}
+                      type="button"
+                      onClick={() => {
+                        setSelected(amt);
+                        setCustom("");
+                      }}
+                      className={`rounded-xl border-2 px-3 py-3 text-sm font-semibold transition-colors ${
+                        selected === amt
+                          ? "border-primary bg-sage-soft"
+                          : "border-border bg-card hover:border-primary/40"
+                      }`}
+                    >
+                      {brl(amt)}
+                    </button>
+                  ))}
+                </div>
 
-                    <div className="space-y-2">
-                      <Label htmlFor={`custom-${product.id}`}>Outro valor</Label>
-                      <div className="relative">
-                        <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
-                          R$
-                        </span>
-                        <Input
-                          id={`custom-${product.id}`}
+                <div className="space-y-2">
+                  <Label htmlFor={`custom-${product.id}`}>Outro valor</Label>
+                  <div className="relative">
+                    <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
+                      R$
+                    </span>
+                    <Input
+                      id={`custom-${product.id}`}
                           type="text"
                           inputMode="numeric"
                           autoComplete="off"
                           placeholder="0,00"
-                          value={custom}
-                          onChange={(e) => {
+                      value={custom}
+                      onChange={(e) => {
                             setCustom(formatCurrencyMask(e.target.value));
-                            setSelected(null);
-                          }}
+                        setSelected(null);
+                      }}
                           className="pl-9 tabular-nums"
                         />
                       </div>
@@ -780,11 +780,11 @@ export function GiftCard({
                             <Copy className="h-4 w-4" />
                           )}
                         </Button>
-                      </div>
-                    </div>
                   </div>
+                </div>
+              </div>
 
-                  <DialogFooter>
+              <DialogFooter>
                     <Button
                       variant="ghost"
                       onClick={() => handleOpenChange(false)}
@@ -819,8 +819,8 @@ export function GiftCard({
                       onClick={() => handleOpenChange(false)}
                     >
                       Fechar
-                    </Button>
-                  </DialogFooter>
+                </Button>
+              </DialogFooter>
                 </>
               )}
             </DialogContent>

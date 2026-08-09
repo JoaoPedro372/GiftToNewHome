@@ -1,7 +1,7 @@
 /** Event copy shared by invite + gift list pages. Edit here. */
 export const event = {
   coupleNames: "Carla & João",
-  title: "Noivado",
+  title: "Almoço de noivado",
   title2: "& Chá de Casa Nova",
   tagline: "Estamos comemorando nosso novo lar e noivado!",
   subTagline: "E sua presença é muito importante para nós.",

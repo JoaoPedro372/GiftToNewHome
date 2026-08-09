@@ -1,10 +1,25 @@
 import { createFileRoute, useRouter } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import { Toaster } from "@/components/ui/sonner";
 import { GiftCard } from "@/components/GiftCard";
 import { Button } from "@/components/ui/button";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Gift, Heart, Home } from "lucide-react";
 import { event } from "@/lib/event";
 import { getProducts } from "@/lib/payments";
+
+const HOW_IT_WORKS =
+  'Ao clicar em "Ajudar" você poderá escolher o valor que deseja contribuir para o presente. Podendo ser o valor total do presente ou um valor parcial.';
+
+const CLOSE_DELAY_SECONDS = 5;
 
 export const Route = createFileRoute("/presentes")({
   head: () => ({
@@ -35,10 +50,44 @@ export const Route = createFileRoute("/presentes")({
 function PresentesPage() {
   const products = Route.useLoaderData();
   const router = useRouter();
+  const [helpOpen, setHelpOpen] = useState(true);
+  const [secondsLeft, setSecondsLeft] = useState(CLOSE_DELAY_SECONDS);
+
+  useEffect(() => {
+    if (!helpOpen || secondsLeft <= 0) return;
+    const id = window.setTimeout(() => {
+      setSecondsLeft((s) => s - 1);
+    }, 1000);
+    return () => window.clearTimeout(id);
+  }, [helpOpen, secondsLeft]);
+
+  const canClose = secondsLeft <= 0;
 
   return (
     <div className="min-h-screen bg-background">
       <Toaster position="top-center" richColors />
+
+      <AlertDialog
+        open={helpOpen}
+        onOpenChange={(open) => {
+          if (!open && !canClose) return;
+          setHelpOpen(open);
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Como funciona</AlertDialogTitle>
+            <AlertDialogDescription className="text-base text-foreground/90">
+              {HOW_IT_WORKS}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogAction disabled={!canClose}>
+              {canClose ? "Fechar" : `Fechar (${secondsLeft}s)`}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <header className="bg-hero relative overflow-hidden">
         <div className="mx-auto max-w-5xl px-6 pb-16 pt-10 sm:pb-24 sm:pt-14">
@@ -74,9 +123,7 @@ function PresentesPage() {
             contribua com o valor que estiver no seu coração.
           </p>
           <p className="mt-5 max-w-2xl text-base text-muted-foreground sm:text-lg">
-            Ao clicar em "Ajudar" você poderá escolher o valor que deseja
-            contribuir para o presente. Podendo ser o valor total do presente ou
-            um valor parcial.
+            {HOW_IT_WORKS}
           </p>
         </div>
       </header>
