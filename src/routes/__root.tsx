@@ -10,6 +10,7 @@ import {
 import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
+import { event } from "../lib/event";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 
 function NotFoundComponent() {
@@ -81,19 +82,23 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       meta: [
         { charSet: "utf-8" },
         { name: "viewport", content: "width=device-width, initial-scale=1" },
-        { title: "Chá de Casa Nova" },
+        {
+          title: `${event.title} ${event.title2} · ${event.coupleNames}`,
+        },
         {
           name: "description",
-          content:
-            "Lista de presentes do nosso chá de casa nova — escolha um item e contribua com o valor que quiser.",
+          content: event.tagline,
         },
-        { property: "og:title", content: "Chá de Casa Nova" },
+        {
+          property: "og:title",
+          content: `${event.title} ${event.title2} · ${event.coupleNames}`,
+        },
         {
           property: "og:description",
-          content: "Lista de presentes do nosso chá de casa nova.",
+          content: event.tagline,
         },
         { property: "og:type", content: "website" },
-        // Foto da prévia no WhatsApp: arquivo em public/og-share.jpeg
+        // Foto da prévia no WhatsApp: public/og-share.jpeg
         {
           property: "og:image",
           content: `${(process.env.APP_URL ?? "").replace(/\/$/, "")}/og-share.jpeg`,
