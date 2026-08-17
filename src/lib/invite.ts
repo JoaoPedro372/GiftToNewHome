@@ -34,11 +34,22 @@ export function inviteMessageText(
   const greeting = couple
     ? `Vocês estão convidados para o ${event.title} ${event.title2} de ${event.coupleNames}.`
     : `Você está convidado para o ${event.title} ${event.title2} de ${event.coupleNames}.`;
+  const reminderMessage = `🏠✨ Está chegando o dia do nosso almoço de noivado e chá de casa nova!
+
+Estamos super animados para comemorar esse momento com vocês! 
+
+Como estamos entrando na reta final dos preparativos, precisamos organizar tudo certinho de acordo com a quantidade de pessoas.
+
+Por isso, pedimos que confirme sua presença até o dia 20/08. 
+
+Sua confirmação nos ajuda a preparar tudo com carinho e na quantidade certa!
+
+Esperamos vocês! ❤️🏠`;
 
   return [
     `Oi, ${input.displayName}!`,
     "",
-    greeting,
+    reminderMessage,
     "",
     `Confirme presença e se quiser nos ajudar nessa nova etapa, veja a lista de presentes aqui:`,
     url,
